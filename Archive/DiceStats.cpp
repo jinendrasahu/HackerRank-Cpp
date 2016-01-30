@@ -61,52 +61,93 @@ template<typename S, typename T> inline void chmax(S& a, T b) { if (a < b) a = b
 
 constexpr int R = 6;
 double p[R];
-double r[R][R];
-int N;
 
 constexpr int L = 100000 + 1;
 constexpr int RL = R * L + 1;
 double dp[2][R][RL] = {};
+double r[R] = {};
+double s[RL] = {};
 
-void solve()
+void solve(int N)
 {
+    ZERO(dp);
+    ZERO(s);
     REP(i, R) dp[1][i][i + 1] = p[i];
     FOR(i, 2, N) {
-        int ip = (i - 1) & 1;
-        int ic = i & 1;
-        REP(j, R) REP(k, R) {
-            if (j == k) continue;
-            FOR(l, 1, (i - 1) * R) {
-                dp[ic][k][l + k + 1] += dp[ip][j][l] * r[k][j];
-            }
-        }
-        REP(j, R) FOR(k, 1, (i - 1) * R) dp[ip][j][k] = 0;
+        const int ip = (i - 1) & 1;
+        const int ic = i & 1;
+        const int M = (i - 1) * R + 1;
+        REP(j, R) REP(k, M) s[k] += dp[ip][j][k];
+        REP(j, R) REP(k, M) dp[ic][j][j + k + 1] += (s[k] - dp[ip][j][k]) * r[j];
+        REP(j, R) REP(k, M) dp[ip][j][k] = 0;
+        REP(j, R) REP(k, M) s[k] = 0;
     }
 }
 
-sstrm testData(R"(0.16666666667
-0.16666666666
-0.16666666667
-0.16666666667
-0.16666666666
-0.16666666667
-300)");
+void res(int N, double& mean, double& var)
+{
+    const int ic = N & 1;
+    mean = 0;
+    REP(i, R) REP(j, RL) mean += j * dp[ic][i][j];
+    var = 0;
+    ZERO(s);
+    REP(i, R) REP(j, RL) s[j] += dp[ic][i][j];
+    REP(i, RL) var += SQR(i - mean) * s[i];
+}
+
+void output(const double& mean, const double& var)
+{
+    cout << fixed << setprecision(6) << mean << '\n' << var << endl;
+}
+
+sstrm testData(R"(0.17000491340
+0.15520686444
+0.15219502924
+0.19007939362
+0.15583770397
+0.17667609533
+2999)");
+// 10583.017732174100713109
+// 5851.525476513932206592
+
+//0.15044480060
+//0.13409301419
+//0.17442237068
+//0.18807442672
+//0.18225873540
+//0.17070665241
+//99999
+//
+//360598.884964320636408367
+//191714.990006715491674631
 
 int main( int argc, char* argv[] )
 {
     auto& input = testData;
     for (auto& pi : p) input >> pi;
-    REP(i, R) REP(j, 6) r[i][j] = p[i] / (1 - p[j]);
+    REP(i, R) r[i] = p[i] / (1 - p[i]);
+    int N;
     input >> N;
-    solve();
-    double ev = 0;
-    double ev2 = 0;
-    int ic = N & 1;
-    REP(i, R) REP(j, RL) {
-        ev += j * dp[ic][i][j];
-        ev2 += SQR(j) * dp[ic][i][j];
+    if (N <= 3000) {
+        double mean, var;
+        solve(N);
+        res(N, mean, var);
+        output(mean, var);
     }
-    cout << fixed << setprecision(6) << ev << '\n' << ev2 - SQR(ev) << endl;
+    else {
+        const int N1 = 1000 + N % 1000;
+        const int N2 = N1 + 1000;
+        solve(N1);
+        double mean1, var1;
+        res(N1, mean1, var1);
+        solve(N2);
+        double mean2, var2;
+        res(N2, mean2, var2);
+        double dmean = mean2 - mean1;
+        double dvar = var2 - var1;
+        const int dN = (N - N1) / 1000;
+        output(mean1 + dN * dmean, var1 + dN * dvar);
+    }
     return 0;
 }
 
