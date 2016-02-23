@@ -92,11 +92,28 @@ int main( int argc, char* argv[] )
         }
         l2[i] = j - i;
     }
+    unordered_map<ll, ll> imax;
+    unordered_map<ll, ll> iall;
+    unordered_map<ll, ll> isum;
+
+    for (auto& pp : imax) {
+        ll ai = pp.first;
+
+
+    }
+
+
+
     // for (ll x : l2) cerr << x << endl;
     vector<ll> lt(N);
     REP(i, N) lt[i] = ((l1[i] + 1) * (l2[i] + 1)) % mod;
+    vector<ll> la(N);
+    REP(i, N) {
+        ll len = l1[i] + l2[i] + 1;
+        la[i] = len * (len - 1) / 2;
+    }
     vector<pair<ll, ll>> v(N);
-    REP(i, N) v[i] = make_pair(a[i], lt[i]);
+    REP(i, N) v[i] = make_pair(a[i], la[i]);
     for (auto& pp : v) {
         cerr << pp.first << " " << pp.second << endl;
     }
@@ -112,17 +129,20 @@ int main( int argc, char* argv[] )
     }
     unordered_map<ll, ll> ml;
     REP(i, N) ml[a[i]] = lt[i];
-    unordered_map<ll, ll> mt;
-    REP(i, N) mt[v[i].first] = v[i].second;
+    unordered_map<ll, ll> ma;
+    REP(i, N) ma[a[i]] = la[i];
+    unordered_map<ll, ll> mv;
+    REP(i, N) mv[v[i].first] = v[i].second;
     ll ans = 0;
     cerr << endl;
     for (auto& pp : ml) {
         ll ai = pp.first;
         ll li = pp.second;
-        ll lti = mt[ai];
-        assert (li <= lti);
-        cerr << ans << " += " << ai << " * " << li << " * " << lti - li << endl;
-        ans += (((ai * li) % mod) * ((lti - li) % mod)) % mod;
+        ll lai = ma[ai];
+        ll lvi = mv[ai];
+        assert (li <= lvi);
+        cerr << ans << " += " << ai << " * " << li << " * " << lvi - li << endl;
+        ans += (((ai * li) % mod) * ((lvi - li) % mod)) % mod;
         ans %= mod;
     }
     // cout << ans << endl;
