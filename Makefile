@@ -1,5 +1,5 @@
 CC     = g++
-CFLAGS = -std=c++11 -Wall -g -Wno-unused-function -Wno-unused-variable -Wno-sign-compare
+CFLAGS = -std=c++14 -Wall -g -Wno-unused-function -Wno-unused-variable -Wno-sign-compare
 LFLAGS = -Wl,--no-as-needed -lprofiler -Wl,--as-needed
 SRCS   = $(wildcard *.cpp)
 BINS   = $(patsubst %.cpp, %, $(SRCS))
@@ -19,6 +19,5 @@ clobber :
 archive : clobber
 	@echo $(SRCS)
 	mv *.cpp Archive
-	mv *.html Archive
 
 .PHONY : test clobber archive
